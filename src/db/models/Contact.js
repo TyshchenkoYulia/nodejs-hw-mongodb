@@ -25,6 +25,7 @@ const contactShema = new Schema(
       default: 'personal',
     },
   },
+
   { timestamps: true, versionKey: false },
 );
 
