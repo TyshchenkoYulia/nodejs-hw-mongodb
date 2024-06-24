@@ -15,8 +15,9 @@ const setupServer = () => {
     },
   });
 
-  app.use(logger);
+  app.use(express.json());
   app.use(cors());
+  app.use(logger);
 
   app.get('/api/contacts', async (req, res) => {
     const data = await getContacts();
