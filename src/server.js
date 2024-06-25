@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import pino from 'pino-http';
 import env from './utils/env.js';
-import { getContactById, getContacts } from './services/contacts.js';
+import { getContactById, getContacts } from './services/contact.js';
 
 const port = env('PORT', '3000');
 
