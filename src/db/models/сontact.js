@@ -29,6 +29,6 @@ const contactShema = new Schema(
   { timestamps: true, versionKey: false },
 );
 
-const Contact = model('contacts', contactShema);
+const Contact = model('contact', contactShema);
 
 export default Contact;
