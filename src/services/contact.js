@@ -8,7 +8,6 @@ export const addContact = (data) => Contact.create(data);
 
 export const updateContact = async (filter, data, options = {}) => {
   const result = await Contact.findOneAndUpdate(filter, data, {
-    new: true,
     includeResultMetadata: true,
     ...options,
   });
