@@ -1,16 +1,20 @@
 import { Schema, model } from 'mongoose';
 import { mongooseSaveError, setUpdateSettings } from './hooks.js';
-import { typeList } from '../../constants/contacts-constants.js';
+import {
+  phoneNumberValidation,
+  typeList,
+} from '../../constants/contacts-constants.js';
 
 const contactShema = new Schema(
   {
     name: {
       type: String,
-      required: true,
+      required: [true, 'Name must be'],
     },
     phoneNumber: {
       type: String,
-      required: true,
+      match: phoneNumberValidation,
+      required: [true, 'PhoneNumber must be'],
     },
     email: {
       type: String,
