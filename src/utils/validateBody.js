@@ -14,7 +14,7 @@ const validateBody = (schema) => {
       next(responseError);
     }
   };
-  return func();
+  return func;
 };
 
 export default validateBody;
