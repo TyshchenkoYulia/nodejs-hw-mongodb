@@ -21,13 +21,13 @@ contactsRouter.get('/:contactId', ctrlWrapper(getContactsByIdController));
 
 contactsRouter.post(
   '/',
-  // validateBody(contactAddSchema),
+  validateBody(contactAddSchema),
   ctrlWrapper(addContactController),
 );
 
 contactsRouter.patch(
   '/:contactId',
-  // validateBody(contactUpdateSchema),
+  validateBody(contactUpdateSchema),
   ctrlWrapper(patchContactController),
 );
 
