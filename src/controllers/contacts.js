@@ -9,16 +9,19 @@ import {
 import parsePaginationParams from '../utils/parsePaginationParams.js';
 import parseSortParams from '../utils/parseSortParams.js';
 import { contactFieldList } from '../constants/contacts-constants.js';
+import parseContactFilterParams from '../utils/parseContactFilterParams.js';
 
 export const getAllContactsController = async (req, res) => {
   const { page, perPage } = parsePaginationParams(req.query);
   const { sortBy, sortOrder } = parseSortParams(req.query, contactFieldList);
+  const filterIsFavourite = parseContactFilterParams(req.query);
 
   const data = await getContacts({
     page,
     perPage,
     sortBy,
     sortOrder,
+    filterIsFavourite,
   });
 
   res.json({
