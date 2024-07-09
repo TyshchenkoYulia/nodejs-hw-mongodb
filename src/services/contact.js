@@ -2,25 +2,27 @@ import Contact from '../db/models/сontact.js';
 import { calcPaginationData } from '../utils/calcPaginationData.js';
 
 export const getContacts = async ({
-  filterIsFavourite,
-  page,
-  perPage,
+  filterIsFavourite = {},
+  page = 1,
+  perPage = 10,
   sortBy,
   sortOrder,
 }) => {
   const skip = (page - 1) * perPage;
 
-  const data = await Contact.find()
+  const dataQuery = Contact.find();
+
+  if (filterIsFavourite.isFavourite) {
+    dataQuery.where('isFavourite').equals(filterIsFavourite.isFavourite);
+  }
+
+  const data = await dataQuery
     .skip(skip)
     .limit(perPage)
     .sort({ [sortBy]: sortOrder })
-    .where('isFavourite')
-    .equals(filterIsFavourite.isFavourite);
+    .exec();
 
-  const totalItems = await Contact.find()
-    .where('isFavourite')
-    .equals(filterIsFavourite.isFavourite)
-    .countDocuments();
+  const totalItems = await Contact.find().merge(dataQuery).countDocuments();
   const { totalPages, hasPreviousPage, hasNextPage } = calcPaginationData({
     total: totalItems,
     page,
