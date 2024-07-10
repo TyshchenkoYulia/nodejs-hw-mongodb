@@ -4,11 +4,6 @@ const parseBoolean = (value) => {
   if (typeof value !== 'string') return;
   if (!['true', 'false'].includes(value)) return;
 
-  // return value === 'true';
-
-  // const parsedValue = Boolean(value);
-  // return parsedValue;
-
   const parsedValue = value.toLowerCase() === 'true';
 
   return parsedValue;
