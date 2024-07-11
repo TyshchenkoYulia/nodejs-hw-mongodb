@@ -16,18 +16,19 @@ export const getContacts = async ({
     dataQuery.where('isFavourite').equals(filterIsFavourite.isFavourite);
   }
 
+  const totalItems = await Contact.find().merge(dataQuery).countDocuments();
+
   const data = await dataQuery
     .skip(skip)
     .limit(perPage)
     .sort({ [sortBy]: sortOrder })
     .exec();
 
-  const totalItems = await Contact.find().merge(dataQuery).countDocuments();
-  const { totalPages, hasPreviousPage, hasNextPage } = calcPaginationData({
-    total: totalItems,
+  const { totalPages, hasPreviousPage, hasNextPage } = calcPaginationData(
+    totalItems,
     page,
     perPage,
-  });
+  );
 
   return {
     data,
