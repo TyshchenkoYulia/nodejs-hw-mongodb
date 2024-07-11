@@ -1,9 +1,9 @@
 import { Schema, model } from 'mongoose';
 import { mongooseSaveError, setUpdateSettings } from './hooks.js';
-import {
-  phoneNumberValidation,
-  typeList,
-} from '../../constants/contacts-constants.js';
+// import {
+//   phoneNumberValidation,
+//   typeList,
+// } from '../../constants/contacts-constants.js';
 
 const contactShema = new Schema(
   {
@@ -13,7 +13,7 @@ const contactShema = new Schema(
     },
     phoneNumber: {
       type: String,
-      match: phoneNumberValidation,
+      // match: phoneNumberValidation,
       required: [true, 'PhoneNumber must be'],
     },
     email: {
@@ -26,7 +26,7 @@ const contactShema = new Schema(
     },
     contactType: {
       type: String,
-      enum: typeList,
+      enum: ['work', 'home', 'personal'],
       required: false,
       default: 'personal',
     },
