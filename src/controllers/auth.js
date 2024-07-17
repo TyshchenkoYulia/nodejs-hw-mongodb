@@ -1,9 +1,11 @@
 import createHttpError from 'http-errors';
 import { findUser, signup } from '../services/auth.js';
+import { compareHash } from '../utils/hash.js';
 
-export const signupController = async (req, res) => {
+export const registerController = async (req, res) => {
   const { email } = req.body;
   const user = await findUser({ email });
+
   const newUser = await signup(req.body);
 
   if (user) {
@@ -20,4 +22,19 @@ export const signupController = async (req, res) => {
     message: 'Successfully registered a user!',
     data,
   });
+};
+
+export const loginController = async (req, res) => {
+  const { email, password } = req.body;
+  const user = await findUser({ email });
+  if (!user) {
+    throw createHttpError(404, 'Email not found !!!');
+  }
+
+  const passwordCompare = await compareHash(password, user.password);
+  if (!passwordCompare) {
+    throw createHttpError(401, 'Password invalid !!!');
+  }
+
+  res.status(201).json({});
 };
