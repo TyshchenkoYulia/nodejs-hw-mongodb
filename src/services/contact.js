@@ -12,6 +12,10 @@ export const getContacts = async ({
 
   const dataQuery = Contact.find();
 
+  if (filterIsFavourite.userId) {
+    dataQuery.where('userId').equals(filterIsFavourite.userId);
+  }
+
   if (filterIsFavourite.isFavourite) {
     dataQuery.where('isFavourite').equals(filterIsFavourite.isFavourite);
   }
@@ -41,7 +45,10 @@ export const getContacts = async ({
   };
 };
 
-export const getContactById = (id) => Contact.findById(id);
+export const getContactById = async (filter) => {
+  const result = await Contact.findOne(filter);
+  return result;
+};
 
 export const addContact = (data) => Contact.create(data);
 

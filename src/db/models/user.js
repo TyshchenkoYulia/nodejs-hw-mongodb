@@ -26,5 +26,5 @@ userSchema.post('save', mongooseSaveError);
 userSchema.pre('findOneAndUpdate', setUpdateSettings);
 userSchema.post('findOneAndUpdate', mongooseSaveError);
 
-const User = model('users', userSchema);
+const User = model('user', userSchema);
 export default User;
