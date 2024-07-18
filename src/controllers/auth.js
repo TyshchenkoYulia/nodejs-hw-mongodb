@@ -1,6 +1,22 @@
 import createHttpError from 'http-errors';
 import { findUser, signup } from '../services/auth.js';
 import { compareHash } from '../utils/hash.js';
+import { createSession, findSession } from '../services/session.js';
+
+const setupResponseSession = (
+  res,
+  { refreshToken, refreshTokenValidUntil, _id },
+) => {
+  res.cookie('refreshToken', refreshToken, {
+    httpOnly: true,
+    expires: refreshTokenValidUntil,
+  });
+
+  res.cookie('sessionId', _id, {
+    httpOnly: true,
+    expires: refreshTokenValidUntil,
+  });
+};
 
 export const registerController = async (req, res) => {
   const { email } = req.body;
@@ -36,5 +52,41 @@ export const loginController = async (req, res) => {
     throw createHttpError(401, 'Password invalid !!!');
   }
 
-  res.status(201).json({});
+  const session = await createSession(user._id);
+
+  setupResponseSession(res, session);
+
+  res.json({
+    status: 200,
+    message: 'Successfully logged in an user !!!',
+    data: {
+      accessToken: session.accessToken,
+    },
+  });
+};
+
+export const refreshController = async (req, res) => {
+  const { refreshToken, sessionId } = req.cookies;
+
+  const currentSession = await findSession({ refreshToken, sessionId });
+  if (!currentSession) {
+    throw createHttpError(401, 'Session not found !!!');
+  }
+
+  const refreshTokenExpiered =
+    new Date() > new Date(currentSession.refreshTokenValidUntil);
+  if (refreshTokenExpiered) {
+    throw createHttpError(401, 'Session expired !!!');
+  }
+
+  const newSession = createSession(currentSession.userId);
+
+  setupResponseSession(res, newSession);
+  res.json({
+    status: 200,
+    message: 'Successfully refreshed a session !!!',
+    data: {
+      accessToken: newSession.accessToken,
+    },
+  });
 };
