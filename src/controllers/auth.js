@@ -11,6 +11,8 @@ const setupResponseSession = (
   res,
   { refreshToken, refreshTokenValidUntil, _id },
 ) => {
+  console.log('22222222');
+
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
     expires: refreshTokenValidUntil,
@@ -71,19 +73,19 @@ export const loginController = async (req, res) => {
 export const refreshController = async (req, res) => {
   const { refreshToken, sessionId } = req.cookies;
 
-  const currentSession = await findSession({ refreshToken, sessionId });
+  const currentSession = await findSession({ _id: sessionId, refreshToken });
   if (!currentSession) {
     throw createHttpError(401, 'Session not found !!!');
   }
 
   const refreshTokenExpiered =
     new Date() > new Date(currentSession.refreshTokenValidUntil);
+
   if (refreshTokenExpiered) {
     throw createHttpError(401, 'Session expired !!!');
   }
 
-  const newSession = createSession(currentSession.userId);
-
+  const newSession = await createSession(currentSession.userId);
   setupResponseSession(res, newSession);
   res.json({
     status: 200,
@@ -99,10 +101,11 @@ export const logoutController = async (req, res) => {
   if (!sessionId) {
     throw createHttpError(401, 'Session not found !!!');
   }
+  console.log('111111');
 
   await deleteSession({ _id: sessionId });
 
-  res.clearCookies('sessionId');
-  res.clearCookies('refreshToken');
+  res.clearCookie('sessionId');
+  res.clearCookie('refreshToken');
   res.status(204).send();
 };
