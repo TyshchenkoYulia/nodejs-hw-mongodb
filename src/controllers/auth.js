@@ -101,7 +101,6 @@ export const logoutController = async (req, res) => {
   if (!sessionId) {
     throw createHttpError(401, 'Session not found !!!');
   }
-  console.log('111111');
 
   await deleteSession({ _id: sessionId });
 
