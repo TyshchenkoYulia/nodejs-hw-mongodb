@@ -1,7 +1,11 @@
 import createHttpError from 'http-errors';
 import { findUser, signup } from '../services/auth.js';
 import { compareHash } from '../utils/hash.js';
-import { createSession, findSession } from '../services/session.js';
+import {
+  createSession,
+  deleteSession,
+  findSession,
+} from '../services/session.js';
 
 const setupResponseSession = (
   res,
@@ -22,11 +26,10 @@ export const registerController = async (req, res) => {
   const { email } = req.body;
   const user = await findUser({ email });
 
-  const newUser = await signup(req.body);
-
   if (user) {
-    throw createHttpError(409, 'Email in use');
+    throw createHttpError(409, 'Email in use!!!');
   }
+  const newUser = await signup(req.body);
 
   const data = {
     name: newUser.name,
@@ -35,7 +38,7 @@ export const registerController = async (req, res) => {
 
   res.status(201).json({
     status: 201,
-    message: 'Successfully registered a user!',
+    message: 'Successfully registered an user!!!',
     data,
   });
 };
@@ -89,4 +92,17 @@ export const refreshController = async (req, res) => {
       accessToken: newSession.accessToken,
     },
   });
+};
+
+export const logoutController = async (req, res) => {
+  const { sessionId } = req.cookies;
+  if (!sessionId) {
+    throw createHttpError(401, 'Session not found !!!');
+  }
+
+  await deleteSession({ _id: sessionId });
+
+  res.clearCookies('sessionId');
+  res.clearCookies('refreshToken');
+  res.status(204).send();
 };

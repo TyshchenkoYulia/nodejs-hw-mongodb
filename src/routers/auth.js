@@ -4,6 +4,7 @@ import validateBody from '../utils/validateBody.js';
 import { userSigninSchema, userSignupSchema } from '../validation/users.js';
 import {
   loginController,
+  logoutController,
   refreshController,
   registerController,
 } from '../controllers/auth.js';
@@ -24,3 +25,4 @@ authRouter.post(
 );
 
 authRouter.post('/refresh', ctrlWrapper(refreshController));
+authRouter.post('/logout', ctrlWrapper(logoutController));
