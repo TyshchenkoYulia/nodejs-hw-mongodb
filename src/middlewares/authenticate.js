@@ -8,7 +8,7 @@ const authenticate = async (req, res, next) => {
     return next(createHttpError(401, 'Authorization header missing!'));
   }
 
-  const [bearer, accessToken] = authHeder.splite(' ');
+  const [bearer, accessToken] = authHeder.split(' ');
 
   if (bearer !== 'Bearer') {
     return next(createHttpError(401, 'Token must have Bearer type!'));
