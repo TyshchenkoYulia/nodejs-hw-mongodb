@@ -52,6 +52,10 @@ export const loginController = async (req, res) => {
     throw createHttpError(404, 'Email not found !!!');
   }
 
+  if (!user.verify) {
+    throw createHttpError(401, 'Email not verify !!!');
+  }
+
   const passwordCompare = await compareHash(password, user.password);
   if (!passwordCompare) {
     throw createHttpError(401, 'Password invalid !!!');
