@@ -5,30 +5,14 @@ import {
   requestResetToken,
   resetPassword,
   loginUser,
-  // logoutUser,
 } from '../services/auth.js';
 import {
-  createSession,
+  // createSession,
   deleteSession,
-  findSession,
+  // findSession,
+  refreshUsersSession,
 } from '../services/session.js';
-
-const setupResponseSession = (
-  res,
-  { refreshToken, refreshTokenValidUntil, _id },
-) => {
-  console.log('22222222');
-
-  res.cookie('refreshToken', refreshToken, {
-    httpOnly: true,
-    expires: refreshTokenValidUntil,
-  });
-
-  res.cookie('sessionId', _id, {
-    httpOnly: true,
-    expires: refreshTokenValidUntil,
-  });
-};
+import { REFRESH_TOKEN_LIFETIME } from '../constants/index.js';
 
 export const registerController = async (req, res) => {
   const { email } = req.body;
@@ -38,29 +22,6 @@ export const registerController = async (req, res) => {
     throw createHttpError(409, 'Email in use!!!');
   }
   const newUser = await signup(req.body);
-
-  // const payload = {
-  //   id: newUser._id,
-  //   email,
-  // };
-
-  // const token = jwt.sign(payload, jwt_secret);
-
-  // const emailTemplateSource = await fs.readFile(verifyEmailPath, 'utf-8');
-  // const emailTemplate = handlebars.compile(emailTemplateSource);
-  // const html = emailTemplate({
-  //   project_name: 'My contacts',
-  //   app_domain,
-  //   token,
-  // });
-
-  // const verifyEmail = {
-  //   subject: 'Verify email',
-  //   to: email,
-  //   html,
-  // };
-
-  // await sendMail(verifyEmail);
 
   const data = {
     name: newUser.name,
@@ -74,28 +35,6 @@ export const registerController = async (req, res) => {
   });
 };
 
-// export const verifyController = async (req, res) => {
-//   const { token } = req.query;
-
-//   try {
-//     const { id, email } = jwt.verify(token, jwt_secret);
-
-//     const user = await findUser({ _id: id, email });
-//     if (!user) {
-//       throw createHttpError(404, 'User not found !!!');
-//     }
-
-//     await updateUser({ email }, { verify: true });
-
-//     res.json({
-//       status: 200,
-//       message: 'Email verify successfully !!!',
-//     });
-//   } catch (error) {
-//     throw createHttpError(401, error.message);
-//   }
-// };
-
 export const loginController = async (req, res) => {
   const session = await loginUser(req.body);
 
@@ -108,30 +47,56 @@ export const loginController = async (req, res) => {
   });
 };
 
+const setupResponseSession = (res, session) => {
+  res.cookie('refreshToken', session.refreshToken, {
+    httpOnly: true,
+    expires: new Date(Date.now() + REFRESH_TOKEN_LIFETIME),
+  });
+  res.cookie('sessionId', session._id, {
+    httpOnly: true,
+    expires: new Date(Date.now() + REFRESH_TOKEN_LIFETIME),
+  });
+};
+
 export const refreshController = async (req, res) => {
-  const { refreshToken, sessionId } = req.cookies;
+  const session = await refreshUsersSession({
+    sessionId: req.cookies.sessionId,
+    refreshToken: req.cookies.refreshToken,
+  });
 
-  const currentSession = await findSession({ _id: sessionId, refreshToken });
-  if (!currentSession) {
-    throw createHttpError(401, 'Session not found !!!');
-  }
+  setupResponseSession(res, session);
 
-  const refreshTokenExpiered =
-    new Date() > new Date(currentSession.refreshTokenValidUntil);
-
-  if (refreshTokenExpiered) {
-    throw createHttpError(401, 'Session expired !!!');
-  }
-
-  const newSession = await createSession(currentSession.userId);
-  setupResponseSession(res, newSession);
   res.json({
     status: 200,
-    message: 'Successfully refreshed a session !!!',
+    message: 'Successfully refreshed a session!',
     data: {
-      accessToken: newSession.accessToken,
+      accessToken: session.accessToken,
     },
   });
+
+  // const { refreshToken, sessionId } = req.cookies;
+
+  // const currentSession = await findSession({ _id: sessionId, refreshToken });
+  // if (!currentSession) {
+  //   throw createHttpError(401, 'Session not found !!!');
+  // }
+
+  // const refreshTokenExpiered =
+  //   new Date() > new Date(currentSession.refreshTokenValidUntil);
+
+  // if (refreshTokenExpiered) {
+  //   throw createHttpError(401, 'Session expired !!!');
+  // }
+
+  // const newSession = await createSession(currentSession.userId);
+  // setupResponseSession(res, newSession);
+  // res.json({
+  //   status: 200,
+  //   message: 'Successfully refreshed a session !!!',
+  //   data: {
+  //     accessToken: newSession.accessToken,
+  //   },
+  // });
 };
 
 export const logoutController = async (req, res) => {
@@ -146,6 +111,7 @@ export const logoutController = async (req, res) => {
 };
 
 export const requestResetEmailController = async (req, res) => {
+  // console.log(req.body.email);
   await requestResetToken(req.body.email);
   res.json({
     message: 'Reset password email was successfully sent!',

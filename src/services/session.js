@@ -4,6 +4,7 @@ import {
   ACCESS_TOKEN_LIFETIME,
   REFRESH_TOKEN_LIFETIME,
 } from '../constants/index.js';
+import createHttpError from 'http-errors';
 
 export const findSession = (filter) => Session.findOne(filter);
 
@@ -25,4 +26,30 @@ export const createSession = async (userId) => {
   });
 };
 
-export const deleteSession = (filter) => Session.deleteOne(filter);
+export const deleteSession = async (sessionId) => {
+  await Session.deleteOne({ _id: sessionId });
+};
+
+export const refreshUsersSession = async ({ sessionId, refreshToken }) => {
+  const session = await Session.findOne({
+    _id: sessionId,
+    refreshToken,
+  });
+
+  if (!session) {
+    throw createHttpError(401, 'Session not found');
+  }
+
+  const isSessionTokenExpired =
+    new Date() > new Date(session.refreshTokenValidUntil);
+
+  if (isSessionTokenExpired) {
+    throw createHttpError(401, 'Session token expired');
+  }
+
+  const newSession = await createSession(session.userId);
+
+  await Session.deleteOne({ _id: sessionId, refreshToken });
+
+  return newSession;
+};
