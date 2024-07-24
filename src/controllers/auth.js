@@ -1,23 +1,29 @@
 import createHttpError from 'http-errors';
-import { findUser, signup, updateUser } from '../services/auth.js';
+import {
+  findUser,
+  signup,
+  updateUser,
+  requestResetToken,
+  resetPassword,
+} from '../services/auth.js';
 import { compareHash } from '../utils/hash.js';
 import {
   createSession,
   deleteSession,
   findSession,
 } from '../services/session.js';
-import { TEMPLATES_DIR } from '../constants/index.js';
 import env from '../utils/env.js';
 import jwt from 'jsonwebtoken';
-import fs from 'node:fs/promises';
-import handlebars from 'handlebars';
-import sendMail from '../utils/sendMail.js';
-import path from 'node:path';
+// import { TEMPLATES_DIR } from '../constants/index.js';
+// import fs from 'node:fs/promises';
+// import handlebars from 'handlebars';
+// import sendMail from '../utils/sendMail.js';
+// import path from 'node:path';
 
-const app_domain = env('APP_DOMAIN');
+// const app_domain = env('APP_DOMAIN');
 const jwt_secret = env('JWT_SECRET');
 
-const verifyEmailPath = path.join(TEMPLATES_DIR, 'verify-email.html');
+// const verifyEmailPath = path.join(TEMPLATES_DIR, 'verify-email.html');
 
 const setupResponseSession = (
   res,
@@ -45,28 +51,28 @@ export const registerController = async (req, res) => {
   }
   const newUser = await signup(req.body);
 
-  const payload = {
-    id: newUser._id,
-    email,
-  };
+  // const payload = {
+  //   id: newUser._id,
+  //   email,
+  // };
 
-  const token = jwt.sign(payload, jwt_secret);
+  // const token = jwt.sign(payload, jwt_secret);
 
-  const emailTemplateSource = await fs.readFile(verifyEmailPath, 'utf-8');
-  const emailTemplate = handlebars.compile(emailTemplateSource);
-  const html = emailTemplate({
-    project_name: 'My contacts',
-    app_domain,
-    token,
-  });
+  // const emailTemplateSource = await fs.readFile(verifyEmailPath, 'utf-8');
+  // const emailTemplate = handlebars.compile(emailTemplateSource);
+  // const html = emailTemplate({
+  //   project_name: 'My contacts',
+  //   app_domain,
+  //   token,
+  // });
 
-  const verifyEmail = {
-    subject: 'Verify email',
-    to: email,
-    html,
-  };
+  // const verifyEmail = {
+  //   subject: 'Verify email',
+  //   to: email,
+  //   html,
+  // };
 
-  await sendMail(verifyEmail);
+  // await sendMail(verifyEmail);
 
   const data = {
     name: newUser.name,
@@ -168,4 +174,22 @@ export const logoutController = async (req, res) => {
   res.clearCookie('sessionId');
   res.clearCookie('refreshToken');
   res.status(204).send();
+};
+
+export const requestResetEmailController = async (req, res) => {
+  await requestResetToken(req.body.email);
+  res.json({
+    message: 'Reset password email was successfully sent!',
+    status: 200,
+    data: {},
+  });
+};
+
+export const resetPasswordController = async (req, res) => {
+  await resetPassword(req.body);
+  res.json({
+    message: 'Password was successfully reset!',
+    status: 200,
+    data: {},
+  });
 };

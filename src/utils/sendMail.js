@@ -1,28 +1,24 @@
+import { SMTP } from '../constants/index.js';
 import nodemailer from 'nodemailer';
-import 'dotenv/config';
 import createHttpError from 'http-errors';
+import env from './env.js';
+import 'dotenv/config';
 
-const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASSWORD } = process.env;
-
-const nodemailerConfig = {
-  host: SMTP_HOST,
-  port: SMTP_PORT,
-  secure: true,
+const transporter = nodemailer.createTransport({
+  host: env(SMTP.SMTP_HOST),
+  port: Number(env(SMTP.SMTP_PORT)),
+  secure: false,
   auth: {
-    user: SMTP_USER,
-    pass: SMTP_PASSWORD,
+    user: env(SMTP.SMTP_USER),
+    pass: env(SMTP.SMTP_PASSWORD),
   },
-};
+});
+const transport = nodemailer.createTransport(transporter);
 
-const transport = nodemailer.createTransport(nodemailerConfig);
-
-const sendMail = async (data) => {
-  //   const email = { ...data, from: SMTP_USER };
-  //   return transport.sendMail(email);
-
+const sendMail = async (options) => {
   try {
-    const email = { ...data, from: SMTP_USER };
-    const send = await transport.sendMail(email);
+    // const email = { ...data, from: SMTP_USER };
+    const send = await transport.sendMail(options);
     return send;
   } catch (error) {
     console.log(error);
