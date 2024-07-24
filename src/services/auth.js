@@ -6,6 +6,8 @@ import sendMail from '../utils/sendMail.js';
 import env from '../utils/env.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import { Session } from '../db/models/session.js';
+import { createSession } from './session.js';
 
 export const findUser = (filter) => User.findOne(filter);
 
@@ -17,6 +19,25 @@ export const signup = async (data) => {
   const hashPassword = await hashValue(password);
 
   return User.create({ ...data, password: hashPassword });
+};
+
+export const loginUser = async (payload) => {
+  const user = await User.findOne({ email: payload.email });
+  if (!user) {
+    throw createHttpError(404, 'User not found');
+  }
+  const isEqual = await bcrypt.compare(payload.password, user.password);
+  if (!isEqual) {
+    throw createHttpError(401, 'Unauthorized');
+  }
+  await Session.deleteOne({ userId: user._id });
+
+  const session = createSession(user._id);
+  return session;
+};
+
+export const logoutUser = async (sessionId) => {
+  await Session.deleteOne({ _id: sessionId });
 };
 
 export const requestResetToken = async (email) => {
@@ -41,7 +62,9 @@ export const requestResetToken = async (email) => {
     from: env(SMTP.SMTP_FROM),
     to: email,
     subject: 'Reset your password',
-    html: `<p>Click <a href="${resetToken}">here</a> to reset your password!</p>`,
+    html: `<p>Click <a target="_blank" href="${env(
+      'APP_DOMAIN',
+    )}/auth/reset-password?token=${resetToken}">here</a> to reset your password!</p>`,
   });
 };
 
