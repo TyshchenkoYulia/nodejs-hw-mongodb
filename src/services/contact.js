@@ -66,6 +66,7 @@ export const updateContact = async (filter, data, options = {}) => {
   if (!result || !result.value) return null;
 
   const isNew = Boolean(result?.lastErrorObject?.upserted);
+  // console.log(result);
 
   return {
     data: result.value,
