@@ -2,28 +2,16 @@ import createHttpError from 'http-errors';
 import {
   findUser,
   signup,
-  updateUser,
   requestResetToken,
   resetPassword,
+  loginUser,
+  // logoutUser,
 } from '../services/auth.js';
-import { compareHash } from '../utils/hash.js';
 import {
   createSession,
   deleteSession,
   findSession,
 } from '../services/session.js';
-import env from '../utils/env.js';
-import jwt from 'jsonwebtoken';
-// import { TEMPLATES_DIR } from '../constants/index.js';
-// import fs from 'node:fs/promises';
-// import handlebars from 'handlebars';
-// import sendMail from '../utils/sendMail.js';
-// import path from 'node:path';
-
-// const app_domain = env('APP_DOMAIN');
-const jwt_secret = env('JWT_SECRET');
-
-// const verifyEmailPath = path.join(TEMPLATES_DIR, 'verify-email.html');
 
 const setupResponseSession = (
   res,
@@ -86,51 +74,34 @@ export const registerController = async (req, res) => {
   });
 };
 
-export const verifyController = async (req, res) => {
-  const { token } = req.query;
+// export const verifyController = async (req, res) => {
+//   const { token } = req.query;
 
-  try {
-    const { id, email } = jwt.verify(token, jwt_secret);
+//   try {
+//     const { id, email } = jwt.verify(token, jwt_secret);
 
-    const user = await findUser({ _id: id, email });
-    if (!user) {
-      throw createHttpError(404, 'User not found !!!');
-    }
+//     const user = await findUser({ _id: id, email });
+//     if (!user) {
+//       throw createHttpError(404, 'User not found !!!');
+//     }
 
-    await updateUser({ email }, { verify: true });
+//     await updateUser({ email }, { verify: true });
 
-    res.json({
-      status: 200,
-      message: 'Email verify successfully !!!',
-    });
-  } catch (error) {
-    throw createHttpError(401, error.message);
-  }
-};
+//     res.json({
+//       status: 200,
+//       message: 'Email verify successfully !!!',
+//     });
+//   } catch (error) {
+//     throw createHttpError(401, error.message);
+//   }
+// };
 
 export const loginController = async (req, res) => {
-  const { email, password } = req.body;
-  const user = await findUser({ email });
-  if (!user) {
-    throw createHttpError(404, 'Email not found !!!');
-  }
-
-  if (!user.verify) {
-    throw createHttpError(401, 'Email not verify !!!');
-  }
-
-  const passwordCompare = await compareHash(password, user.password);
-  if (!passwordCompare) {
-    throw createHttpError(401, 'Password invalid !!!');
-  }
-
-  const session = await createSession(user._id);
-
-  setupResponseSession(res, session);
+  const session = await loginUser(req.body);
 
   res.json({
     status: 200,
-    message: 'Successfully logged in an user !!!',
+    message: 'Successfully logged in an user!',
     data: {
       accessToken: session.accessToken,
     },
@@ -164,15 +135,13 @@ export const refreshController = async (req, res) => {
 };
 
 export const logoutController = async (req, res) => {
-  const { sessionId } = req.cookies;
-  if (!sessionId) {
-    throw createHttpError(401, 'Session not found !!!');
+  if (req.cookies.sessionId) {
+    await deleteSession(req.cookies.sessionId);
   }
-
-  await deleteSession({ _id: sessionId });
 
   res.clearCookie('sessionId');
   res.clearCookie('refreshToken');
+
   res.status(204).send();
 };
 
