@@ -63,6 +63,7 @@ export const refreshController = async (req, res) => {
     sessionId: req.cookies.sessionId,
     refreshToken: req.cookies.refreshToken,
   });
+  // console.log(session);
 
   setupResponseSession(res, session);
 
@@ -73,33 +74,10 @@ export const refreshController = async (req, res) => {
       accessToken: session.accessToken,
     },
   });
-
-  // const { refreshToken, sessionId } = req.cookies;
-
-  // const currentSession = await findSession({ _id: sessionId, refreshToken });
-  // if (!currentSession) {
-  //   throw createHttpError(401, 'Session not found !!!');
-  // }
-
-  // const refreshTokenExpiered =
-  //   new Date() > new Date(currentSession.refreshTokenValidUntil);
-
-  // if (refreshTokenExpiered) {
-  //   throw createHttpError(401, 'Session expired !!!');
-  // }
-
-  // const newSession = await createSession(currentSession.userId);
-  // setupResponseSession(res, newSession);
-  // res.json({
-  //   status: 200,
-  //   message: 'Successfully refreshed a session !!!',
-  //   data: {
-  //     accessToken: newSession.accessToken,
-  //   },
-  // });
 };
 
 export const logoutController = async (req, res) => {
+  console.log(req);
   if (req.cookies.sessionId) {
     await deleteSession(req.cookies.sessionId);
   }
