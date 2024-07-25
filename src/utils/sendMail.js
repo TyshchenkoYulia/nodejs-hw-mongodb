@@ -13,13 +13,16 @@ const transporter = nodemailer.createTransport({
     pass: env(SMTP.SMTP_PASSWORD),
   },
 });
+
+console.log(transporter);
 const transport = nodemailer.createTransport(transporter);
 
 const sendMail = async (options) => {
+  // console.log(options);
   try {
     const send = await transport.sendMail(options);
 
-    // console.log(send);
+    console.log(send);
 
     return send;
   } catch (error) {
