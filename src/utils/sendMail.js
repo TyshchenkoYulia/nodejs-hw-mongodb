@@ -20,7 +20,7 @@ const sendMail = async (options) => {
   try {
     const send = await transport.sendMail(options);
 
-    console.log(send);
+    // console.log(send);
 
     return send;
   } catch (error) {
