@@ -22,6 +22,7 @@ const userSchema = new Schema(
       default: false,
       required: true,
     },
+    photo: { type: String },
   },
   { timestamps: true, versionKey: false },
 );
@@ -31,4 +32,5 @@ userSchema.pre('findOneAndUpdate', setUpdateSettings);
 userSchema.post('findOneAndUpdate', mongooseSaveError);
 
 const User = model('user', userSchema);
+
 export default User;

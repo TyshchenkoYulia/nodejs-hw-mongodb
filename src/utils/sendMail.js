@@ -14,11 +14,9 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-console.log(transporter);
 const transport = nodemailer.createTransport(transporter);
 
 const sendMail = async (options) => {
-  // console.log(options);
   try {
     const send = await transport.sendMail(options);
 
