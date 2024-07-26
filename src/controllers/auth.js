@@ -38,6 +38,15 @@ export const registerController = async (req, res) => {
 export const loginController = async (req, res) => {
   const session = await loginUser(req.body);
 
+  res.cookie('refreshToken', session.refreshToken, {
+    httpOnly: true,
+    expires: new Date(Date.now() + REFRESH_TOKEN_LIFETIME),
+  });
+  res.cookie('sessionId', session._id, {
+    httpOnly: true,
+    expires: new Date(Date.now() + REFRESH_TOKEN_LIFETIME),
+  });
+
   res.json({
     status: 200,
     message: 'Successfully logged in an user!',
@@ -77,7 +86,7 @@ export const refreshController = async (req, res) => {
 };
 
 export const logoutController = async (req, res) => {
-  console.log(req);
+  // console.log(req);
   if (req.cookies.sessionId) {
     await deleteSession(req.cookies.sessionId);
   }

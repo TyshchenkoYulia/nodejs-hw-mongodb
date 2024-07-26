@@ -1,7 +1,8 @@
 import ctrlWrapper from '../utils/ctrlWrapper.js';
 import validateBody from '../utils/validateBody.js';
-import { Router } from 'express';
 import authenticate from '../middlewares/authenticate.js';
+import upload from '../middlewares/multer.js';
+import { Router } from 'express';
 import {
   addContactController,
   deleteContactController,
@@ -24,12 +25,14 @@ contactsRouter.get('/:contactId', ctrlWrapper(getContactsByIdController));
 
 contactsRouter.post(
   '/',
+  upload.single('photo'),
   validateBody(contactAddSchema),
   ctrlWrapper(addContactController),
 );
 
 contactsRouter.patch(
   '/:contactId',
+  upload.single('photo'),
   validateBody(contactUpdateSchema),
   ctrlWrapper(patchContactController),
 );

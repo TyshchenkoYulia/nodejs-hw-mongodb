@@ -27,6 +27,8 @@ export const createSession = async (userId) => {
 };
 
 export const deleteSession = async (sessionId) => {
+  // console.log(sessionId);
+
   await Session.deleteOne({ _id: sessionId });
 };
 
