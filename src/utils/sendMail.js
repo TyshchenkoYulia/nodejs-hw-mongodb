@@ -1,7 +1,7 @@
 import { SMTP } from '../constants/index.js';
 import nodemailer from 'nodemailer';
 import createHttpError from 'http-errors';
-import env from './env.js';
+import env from '../utils/env.js';
 import 'dotenv/config';
 
 const transporter = nodemailer.createTransport({

@@ -3,7 +3,9 @@ import ctrlWrapper from '../utils/ctrlWrapper.js';
 import validateBody from '../utils/validateBody.js';
 import { userSigninSchema, userSignupSchema } from '../validation/users.js';
 import {
+  getGoogleOAuthUrlController,
   loginController,
+  loginWithGoogleController,
   logoutController,
   refreshController,
   registerController,
@@ -11,6 +13,7 @@ import {
   resetPasswordController,
 } from '../controllers/auth.js';
 import {
+  loginWithGoogleOAuthSchema,
   requestResetEmailSchema,
   resetPasswordSchema,
 } from '../validation/auth.js';
@@ -42,6 +45,14 @@ authRouter.post(
   '/reset-password',
   validateBody(resetPasswordSchema),
   ctrlWrapper(resetPasswordController),
+);
+
+authRouter.get('/get-auth-url', ctrlWrapper(getGoogleOAuthUrlController));
+
+authRouter.post(
+  '/confirm-oauth',
+  validateBody(loginWithGoogleOAuthSchema),
+  ctrlWrapper(loginWithGoogleController),
 );
 
 export default authRouter;
