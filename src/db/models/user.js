@@ -22,7 +22,6 @@ const userSchema = new Schema(
       default: false,
       required: true,
     },
-    photo: { type: String },
   },
   { timestamps: true, versionKey: false },
 );
