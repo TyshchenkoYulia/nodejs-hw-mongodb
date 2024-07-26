@@ -16,6 +16,10 @@ export const getContacts = async ({
     dataQuery.where('userId').equals(filterIsFavourite.userId);
   }
 
+  if (filterIsFavourite.type) {
+    dataQuery.where('contactType').equals(filterIsFavourite.type);
+  }
+
   if (filterIsFavourite.isFavourite) {
     dataQuery.where('isFavourite').equals(filterIsFavourite.isFavourite);
   }
@@ -25,8 +29,7 @@ export const getContacts = async ({
   const data = await dataQuery
     .skip(skip)
     .limit(perPage)
-    .sort({ [sortBy]: sortOrder })
-    .exec();
+    .sort({ [sortBy]: sortOrder });
 
   const { totalPages, hasPreviousPage, hasNextPage } = calcPaginationData(
     totalItems,
@@ -54,6 +57,8 @@ export const addContact = (data) => Contact.create(data);
 
 export const updateContact = async (filter, data, options = {}) => {
   const result = await Contact.findOneAndUpdate(filter, data, {
+    new: true,
+    runValidators: true,
     includeResultMetadata: true,
     ...options,
   });
@@ -61,6 +66,7 @@ export const updateContact = async (filter, data, options = {}) => {
   if (!result || !result.value) return null;
 
   const isNew = Boolean(result?.lastErrorObject?.upserted);
+  // console.log(result);
 
   return {
     data: result.value,
