@@ -6,6 +6,7 @@ import sendMail from '../utils/sendMail.js';
 import env from '../utils/env.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
 import { Session } from '../db/models/session.js';
 import { createSession } from './session.js';
 import {
