@@ -6,6 +6,7 @@ import sendMail from '../utils/sendMail.js';
 import env from '../utils/env.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
 import { Session } from '../db/models/session.js';
 import { createSession } from './session.js';
 import {
@@ -57,7 +58,6 @@ export const requestResetToken = async (email) => {
       expiresIn: '15m',
     },
   );
-  // console.log(env(SMTP.SMTP_FROM));
 
   await sendMail({
     from: env(SMTP.SMTP_FROM),
