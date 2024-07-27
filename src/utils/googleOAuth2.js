@@ -4,18 +4,34 @@ import path from 'node:path';
 import env from '../utils/env.js';
 import createHttpError from 'http-errors';
 
-const PATH_JSON = path.join(process.cwd(), 'google-auth.json');
+export const googleAuthSettingsPath = path.resolve('google-auth.json');
+const googleAuthSettings = JSON.parse(await readFile(googleAuthSettingsPath));
 
-const oauthConfig = JSON.parse(await readFile(PATH_JSON));
+const clientId = env('GOOGLE_AUTH_CLIENT_ID');
+const clientSecret = env('GOOGLE_AUTH_CLIENT_SECRET');
 
-const googleOAuthClient = new OAuth2Client({
-  clientId: env('GOOGLE_AUTH_CLIENT_ID'),
-  clientSecret: env('GOOGLE_AUTH_CLIENT_SECRET'),
-  redirectUri: oauthConfig.web.redirect_uris[0],
+const googleAuthClient = new OAuth2Client({
+  clientId,
+  clientSecret,
+  redirectUri: googleAuthSettings.web.redirect_uris[0],
 });
 
+export const getFullNameFromGoogleTokenPayload = ({
+  given_name,
+  family_name,
+}) => {
+  let fullName = 'Guest';
+  if (given_name && family_name) {
+    fullName = `${given_name} ${family_name}`;
+  } else if (given_name) {
+    fullName = given_name;
+  }
+
+  return fullName;
+};
+
 export const generateAuthUrl = () =>
-  googleOAuthClient.generateAuthUrl({
+  googleAuthClient.generateAuthUrl({
     scope: [
       'https://www.googleapis.com/auth/userinfo.email',
       'https://www.googleapis.com/auth/userinfo.profile',
@@ -23,25 +39,15 @@ export const generateAuthUrl = () =>
   });
 
 export const validateCode = async (code) => {
-  const response = await googleOAuthClient.getToken(code);
+  const response = await googleAuthClient.getToken(code);
 
   if (!response.tokens.id_token) {
-    throw createHttpError(401, 'Unauthorized');
+    throw createHttpError(401, 'Google OAuth code invalid');
   }
 
-  const ticket = await googleOAuthClient.verifyIdToken({
+  const ticket = await googleAuthClient.verifyIdToken({
     idToken: response.tokens.id_token,
   });
+
   return ticket;
-};
-
-export const getFullNameFromGoogleTokenPayload = (payload) => {
-  let fullName = 'Guest';
-  if (payload.given_name && payload.family_name) {
-    fullName = `${payload.given_name} ${payload.family_name}`;
-  } else if (payload.given_name) {
-    fullName = payload.given_name;
-  }
-
-  return fullName;
 };

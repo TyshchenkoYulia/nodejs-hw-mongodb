@@ -109,10 +109,7 @@ export const loginOrSignupWithGoogle = async (code) => {
     });
   }
 
-  const newSession = createSession();
+  const newSession = await createSession(user._id);
 
-  return await Session.create({
-    userId: user._id,
-    ...newSession,
-  });
+  return newSession;
 };

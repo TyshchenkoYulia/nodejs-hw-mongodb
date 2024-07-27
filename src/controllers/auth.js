@@ -82,7 +82,6 @@ export const refreshController = async (req, res) => {
 };
 
 export const logoutController = async (req, res) => {
-  // console.log(req);
   if (req.cookies.sessionId) {
     await deleteSession(req.cookies.sessionId);
   }
@@ -94,7 +93,6 @@ export const logoutController = async (req, res) => {
 };
 
 export const requestResetEmailController = async (req, res) => {
-  // console.log(req.body.email);
   await requestResetToken(req.body.email);
   res.json({
     message: 'Reset password email was successfully sent!',
@@ -126,6 +124,8 @@ export const getGoogleOAuthUrlController = async (req, res) => {
 export const loginWithGoogleController = async (req, res) => {
   const session = await loginOrSignupWithGoogle(req.body.code);
   setupResponseSession(res, session);
+
+  // console.log(session);
 
   res.json({
     status: 200,
