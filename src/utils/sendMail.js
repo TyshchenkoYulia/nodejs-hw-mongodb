@@ -7,24 +7,20 @@ import 'dotenv/config';
 const transporter = nodemailer.createTransport({
   host: env(SMTP.SMTP_HOST),
   port: Number(env(SMTP.SMTP_PORT)),
-  secure: false,
+  secure: true,
   auth: {
     user: env(SMTP.SMTP_USER),
     pass: env(SMTP.SMTP_PASSWORD),
   },
 });
 
-const transport = nodemailer.createTransport(transporter);
-
 const sendMail = async (options) => {
   try {
-    const send = await transport.sendMail(options);
-
-    // console.log(send);
+    const send = await transporter.sendMail(options);
 
     return send;
   } catch (error) {
-    console.log(error.message);
+    console.log(error);
     throw createHttpError(
       500,
       'Failed to send the email, please try again later.',

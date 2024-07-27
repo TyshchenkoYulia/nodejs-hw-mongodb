@@ -53,7 +53,6 @@ export const requestResetToken = async (email) => {
       expiresIn: '15m',
     },
   );
-  // console.log(env(SMTP.SMTP_FROM));
 
   await sendMail({
     from: env(SMTP.SMTP_FROM),
@@ -70,9 +69,9 @@ export const resetPassword = async (payload) => {
 
   try {
     entries = jwt.verify(payload.token, env('JWT_SECRET'));
-  } catch (err) {
-    if (err instanceof Error) throw createHttpError(401, err.message);
-    throw err;
+  } catch (error) {
+    if (error instanceof Error)
+      throw createHttpError(401, 'Token is expired or invalid.');
   }
 
   const user = await User.findOne({

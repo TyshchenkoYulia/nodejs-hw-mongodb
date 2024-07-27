@@ -6,12 +6,7 @@ import {
   resetPassword,
   loginUser,
 } from '../services/auth.js';
-import {
-  // createSession,
-  deleteSession,
-  // findSession,
-  refreshUsersSession,
-} from '../services/session.js';
+import { deleteSession, refreshUsersSession } from '../services/session.js';
 import { REFRESH_TOKEN_LIFETIME } from '../constants/index.js';
 
 export const registerController = async (req, res) => {
@@ -72,7 +67,6 @@ export const refreshController = async (req, res) => {
     sessionId: req.cookies.sessionId,
     refreshToken: req.cookies.refreshToken,
   });
-  // console.log(session);
 
   setupResponseSession(res, session);
 
@@ -86,7 +80,6 @@ export const refreshController = async (req, res) => {
 };
 
 export const logoutController = async (req, res) => {
-  // console.log(req);
   if (req.cookies.sessionId) {
     await deleteSession(req.cookies.sessionId);
   }
@@ -98,7 +91,6 @@ export const logoutController = async (req, res) => {
 };
 
 export const requestResetEmailController = async (req, res) => {
-  // console.log(req.body.email);
   await requestResetToken(req.body.email);
   res.json({
     message: 'Reset password email was successfully sent!',
